@@ -1,0 +1,80 @@
+service: parquet-repartitioner
+
+frameworkVersion: '3'
+
+plugins:
+  - serverless-iam-roles-per-function
+  - serverless-prune-plugin
+  - serverless-esbuild
+
+custom:
+
+  s3:
+    # Hint: Make sure the bucket is in the region as the Lambda function,
+    # or you need to manually overwrite the region via the CUSTOM_AWS_REGION env var
+    # See https://aws.amazon.com/s3/faqs/
+    
+    # TODO: Change to real bucket name
+    bucketName: 'my-source-bucket'
+
+  # esbuild settings
+  esbuild:
+    bundle: true
+    minify: false
+    exclude:
+      - duckdb
+
+  # Prune plugin
+  prune:
+    automatic: true
+    number: 3
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  region: ${opt:region, 'us-east-1'}
+  stage: ${opt:stage, 'prd'}
+  logRetentionInDays: 7
+  environment:
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1' # Enable HTTP keep-alive connections for the AWS SDK
+    STAGE: '${self:provider.stage}'
+    LOG_LEVEL: 'debug'
+
+functions:
+
+  repartitionData:
+    handler: src/repartitionData.handler
+    memorySize: 10240
+    timeout: 900
+    iamRoleStatements:
+      # Must have list permission
+      - Effect: Allow
+        Action:
+          - s3:ListBucket
+        Resource:
+          - 'arn:aws:s3:::${self:custom.s3.bucketName}'
+      # For multipart upload see
+      # https://docs.aws.amazon.com/AmazonS3/latest/userguide/mpuoverview.html#mpuAndPermissions
+      - Effect: Allow
+        Action:
+          - s3:GetObject
+          - s3:PutObject
+          - s3:AbortMultipartUpload
+          - s3:ListMultipartUploadParts
+        Resource: 'arn:aws:s3:::${self:custom.s3.bucketName}/*'
+    layers:
+      # Use the public DuckDB layer from https://github.com/tobilg/duckdb-nodejs-layer
+      - 'arn:aws:lambda:${self:provider.region}:041475135427:layer:duckdb-nodejs-layer:5'
+    environment:
+      # TODO: Write your repartitioning query below
+      REPARTITION_QUERY: COPY (SELECT * FROM parquet_scan('s3://${self:custom.s3.bucketName}/input/*.parquet', HIVE_PARTITIONING = 1)) TO 's3://${self:custom.s3.bucketName}/output' (FORMAT PARQUET, PARTITION_BY (column1, column2, column3), ALLOW_OVERWRITE TRUE);
+      # If you want to query a S3 bucket in another region than the Lambda function is deployed to
+      # CUSTOM_AWS_REGION: 'eu-central-1' # Example
+    events:
+      - schedule:
+          # TODO: Change schedule here if necessary
+          # See https://www.serverless.com/framework/docs/providers/aws/events/schedule for details
+          rate: rate(24 hours)
+
+package:
+  individually: true
