@@ -32,6 +32,8 @@ const {
   AWS_SECRET_ACCESS_KEY,
   AWS_SESSION_TOKEN,
   AWS_REGION,
+  DUCKDB_MEMORY_LIMIT,
+  DUCKDB_THREADS,
   CUSTOM_AWS_REGION,
   REPARTITION_QUERY,
 } = process.env;
@@ -59,12 +61,18 @@ export const handler = metricScope(metrics => async (event, context) => {
       const initialSetupStartTimestamp = new Date().getTime();
       
       // Load httpsfs
-      await query(`SET home_directory='/tmp';`);
       await query(`INSTALL httpfs;`);
       await query(`LOAD httpfs;`);
-      
+      // Set home directory
+      await query(`SET home_directory='/tmp';`);
       // New speedup option, see https://github.com/duckdb/duckdb/pull/5405
       await query(`SET enable_http_metadata_cache=true;`);
+      // Set memory limit
+      await query(`SET memory_limit='${parseInt((DUCKDB_MEMORY_LIMIT/1024).toFixed(0))}GB';`);
+      // Set thread count
+      if (DUCKDB_THREADS && DUCKDB_THREADS >= 1 && DUCKDB_THREADS <= 6) {
+        await query(`SET threads TO ${DUCKDB_THREADS};`);
+      }
 
       requestLogger.debug({ message: 'Initial setup done!' });
       metrics.putMetric('InitialSetupDuration', (new Date().getTime() - initialSetupStartTimestamp), Unit.Milliseconds);

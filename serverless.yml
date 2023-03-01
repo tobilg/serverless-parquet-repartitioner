@@ -44,7 +44,9 @@ functions:
 
   repartitionData:
     handler: src/repartitionData.handler
+    # TODO: Optionally configure the Lmbda memory size
     memorySize: 10240
+    # TODO: Optionally set the Lambda timeout (900sec / 15min is the maximum)
     timeout: 900
     iamRoleStatements:
       # Must have list permission
@@ -66,9 +68,14 @@ functions:
       # Use the public DuckDB layer from https://github.com/tobilg/duckdb-nodejs-layer
       - 'arn:aws:lambda:${self:provider.region}:041475135427:layer:duckdb-nodejs-layer:5'
     environment:
+      DUCKDB_MEMORY_LIMIT: ${self:functions.repartitionData.memorySize}
+      # TODO: Optionally set the max thread limit (on Lambda, this is set automatically by the amount of memory the functions has assigned),
+      #       but with this setting you can influence how many files are writte per partition. If you set a lower thread count than available,
+      #       this means that the computation will not use all available resources!
+      # DUCKDB_THREADS: 2 # Example
       # TODO: Write your repartitioning query below
       REPARTITION_QUERY: COPY (SELECT * FROM parquet_scan('s3://${self:custom.s3.bucketName}/input/*.parquet', HIVE_PARTITIONING = 1)) TO 's3://${self:custom.s3.bucketName}/output' (FORMAT PARQUET, PARTITION_BY (column1, column2, column3), ALLOW_OVERWRITE TRUE);
-      # If you want to query a S3 bucket in another region than the Lambda function is deployed to
+      # TODO: If you want to query a S3 bucket in another region than the Lambda function is deployed to
       # CUSTOM_AWS_REGION: 'eu-central-1' # Example
     events:
       - schedule:
