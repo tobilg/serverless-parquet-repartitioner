@@ -5,7 +5,7 @@ let loggerInstance = null;
 export default class Logger {
   constructor (options={}) {
     this.level = options.level || process.env.LOG_LEVEL || 'info';
-    this.name = options.name || `${process.env.DOMAIN_NAME.replace(/\./g, '-')}-logger`
+    this.name = options.name || `parquet-repartitioner-logger`
     return this.getLogger();
   }
 

@@ -60,11 +60,11 @@ export const handler = metricScope(metrics => async (event, context) => {
     if (!isInitialized) {
       const initialSetupStartTimestamp = new Date().getTime();
       
+      // Set home directory
+      await query(`SET home_directory='/tmp';`);
       // Load httpsfs
       await query(`INSTALL httpfs;`);
       await query(`LOAD httpfs;`);
-      // Set home directory
-      await query(`SET home_directory='/tmp';`);
       // New speedup option, see https://github.com/duckdb/duckdb/pull/5405
       await query(`SET enable_http_metadata_cache=true;`);
       // Set memory limit
