@@ -49,13 +49,13 @@ iamRoleStatements:
   - Effect: Allow
     Action:
       - s3:ListBucket
-      - s3:AbortMultipartUpload
       - s3:ListBucketMultipartUploads
-      - s3:ListMultipartUploadParts
     Resource: 'arn:aws:s3:::my-target-bucket'
   - Effect: Allow
     Action:
       - s3:PutObject
+      - s3:AbortMultipartUpload
+      - s3:ListMultipartUploadParts
     Resource: 'arn:aws:s3:::my-target-bucket/*'
 ```
 

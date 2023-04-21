@@ -53,9 +53,7 @@ functions:
       - Effect: Allow
         Action:
           - s3:ListBucket
-          - s3:AbortMultipartUpload
           - s3:ListBucketMultipartUploads
-          - s3:ListMultipartUploadParts
         Resource: 'arn:aws:s3:::${self:custom.s3.bucketName}'
       # For multipart upload see
       # https://docs.aws.amazon.com/AmazonS3/latest/userguide/mpuoverview.html#mpuAndPermissions
@@ -63,6 +61,8 @@ functions:
         Action:
           - s3:GetObject
           - s3:PutObject
+          - s3:AbortMultipartUpload
+          - s3:ListMultipartUploadParts
         Resource: 'arn:aws:s3:::${self:custom.s3.bucketName}/*'
     layers:
       # Use the public DuckDB layer from https://github.com/tobilg/duckdb-nodejs-layer
