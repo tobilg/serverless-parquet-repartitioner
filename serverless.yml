@@ -53,20 +53,20 @@ functions:
       - Effect: Allow
         Action:
           - s3:ListBucket
-        Resource:
-          - 'arn:aws:s3:::${self:custom.s3.bucketName}'
+          - s3:AbortMultipartUpload
+          - s3:ListBucketMultipartUploads
+          - s3:ListMultipartUploadParts
+        Resource: 'arn:aws:s3:::${self:custom.s3.bucketName}'
       # For multipart upload see
       # https://docs.aws.amazon.com/AmazonS3/latest/userguide/mpuoverview.html#mpuAndPermissions
       - Effect: Allow
         Action:
           - s3:GetObject
           - s3:PutObject
-          - s3:AbortMultipartUpload
-          - s3:ListMultipartUploadParts
         Resource: 'arn:aws:s3:::${self:custom.s3.bucketName}/*'
     layers:
       # Use the public DuckDB layer from https://github.com/tobilg/duckdb-nodejs-layer
-      - 'arn:aws:lambda:${self:provider.region}:041475135427:layer:duckdb-nodejs-layer:5'
+      - 'arn:aws:lambda:${self:provider.region}:041475135427:layer:duckdb-nodejs-x86:1'
     environment:
       DUCKDB_MEMORY_LIMIT: ${self:functions.repartitionData.memorySize}
       # TODO: Optionally set the max thread limit (on Lambda, this is set automatically by the amount of memory the functions has assigned),

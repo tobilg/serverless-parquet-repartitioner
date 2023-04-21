@@ -40,8 +40,7 @@ iamRoleStatements:
   - Effect: Allow
     Action:
       - s3:ListBucket
-    Resource:
-      - 'arn:aws:s3:::my-source-bucket'
+    Resource: 'arn:aws:s3:::my-source-bucket'
   - Effect: Allow
     Action:
       - s3:GetObject
@@ -50,13 +49,13 @@ iamRoleStatements:
   - Effect: Allow
     Action:
       - s3:ListBucket
-    Resource:
-      - 'arn:aws:s3:::my-target-bucket'
+      - s3:AbortMultipartUpload
+      - s3:ListBucketMultipartUploads
+      - s3:ListMultipartUploadParts
+    Resource: 'arn:aws:s3:::my-target-bucket'
   - Effect: Allow
     Action:
       - s3:PutObject
-      - s3:AbortMultipartUpload
-      - s3:ListMultipartUploadParts
     Resource: 'arn:aws:s3:::my-target-bucket/*'
 ```
 
