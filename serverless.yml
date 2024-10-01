@@ -31,7 +31,7 @@ custom:
 
 provider:
   name: aws
-  runtime: nodejs16.x
+  runtime: nodejs18.x
   region: ${opt:region, 'us-east-1'}
   stage: ${opt:stage, 'prd'}
   logRetentionInDays: 7
@@ -66,7 +66,7 @@ functions:
         Resource: 'arn:aws:s3:::${self:custom.s3.bucketName}/*'
     layers:
       # Use the public DuckDB layer from https://github.com/tobilg/duckdb-nodejs-layer
-      - 'arn:aws:lambda:${self:provider.region}:041475135427:layer:duckdb-nodejs-x86:5'
+      - 'arn:aws:lambda:${self:provider.region}:041475135427:layer:duckdb-nodejs-x86:13'
     environment:
       DUCKDB_MEMORY_LIMIT: ${self:functions.repartitionData.memorySize}
       # TODO: Optionally set the max thread limit (on Lambda, this is set automatically by the amount of memory the functions has assigned),
