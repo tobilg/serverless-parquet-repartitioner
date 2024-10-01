@@ -23,14 +23,13 @@
   },
   "homepage": "https://github.com/tobilg/parquet-repartitioner#readme",
   "devDependencies": {
-    "esbuild": "^0.16.17",
-    "serverless-esbuild": "^1.39.0",
+    "esbuild": "^0.24.0",
+    "serverless-esbuild": "^1.54.3",
     "serverless-iam-roles-per-function": "next",
-    "serverless-prune-plugin": "^2.0.2",
-    "serverless-s3-sync": "^3.1.0"
+    "serverless-prune-plugin": "^2.0.2"
   },
   "dependencies": {
-    "aws-embedded-metrics": "^4.1.0",
+    "aws-embedded-metrics": "^4.2.0",
     "bunyan": "^1.8.15"
   },
   "jest": {
